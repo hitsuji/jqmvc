@@ -75,7 +75,6 @@ Model.prototype = {
         if ( !name )
             return this
 
-        name = name.split( '.' )
 
         var add = ! this.data.hasOwnProperty( name )
 
