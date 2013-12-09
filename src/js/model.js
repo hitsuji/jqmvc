@@ -61,25 +61,74 @@ Model.prototype = {
 
 
     get: function ( name, def ) {
-        if ( this.data.hasOwnProperty( name ) )
-            return this.data[name]
+        var i    = 0,
+            d    = this.data,
+            path = name.split( '.' ),
+            t    = path.length,
+            cur
 
-        return def
+
+
+        for ( ; i < t; i++ ) {
+            cur = path[i]
+
+            if ( ! d.hasOwnProperty( cur ) )
+                return def
+
+            d = d[cur]
+        }
+
+
+        return d
     },
 
 
 
 
 
-    set: function ( name, value ) {
+    set: function ( name, value, dontTrigger ) {
         if ( !name )
             return this
 
+        var i    = 0,
+            d    = this.data,
+            add  = false,
+            path = name.split( '.' ),
+            t    = path.length - 1,
+            cur
 
-        var add = ! this.data.hasOwnProperty( name )
 
 
-        this.data[name] = value
+
+        for ( ; i < t; i++ ) {
+            cur = path[i]
+
+            if ( d.hasOwnProperty( cur ) ) {
+                d = d[cur]
+                continue
+            }
+
+            d[cur] = {}
+            d = d[cur]
+
+            add = true
+            // addList.push( d )
+        }
+
+
+
+
+        cur = path[i]
+
+
+
+
+        // add = ! this.data.hasOwnProperty( name )
+        if ( ! d.hasOwnProperty( cur ) )
+            add = true
+
+
+        d[cur] = value
 
 
 
