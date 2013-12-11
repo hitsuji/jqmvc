@@ -20,14 +20,14 @@ function Controller ( model, $node ) {
 
 
 
-function controller_router( e  ) {
+function controller_router( e ) {
     var $target = $( e.target ),
         name    = $target.attr( 'c-name' ),
         engine  = this.engine[name]
                 ? this.engine[name]
                 : this.defaultEngine
                 ? this.defaultEngine
-                : this.stringEngine,
+                : this.baseEngine,
         val     = engine( this.model, e, $target )
 
         if ( val === undefined || val === this.model.get( name ) )
@@ -42,21 +42,24 @@ function controller_router( e  ) {
 Controller.prototype = {
     engine: {},
 
-    stringEngine: function ( model, e, $t ) {
-        var tgt = $t.attr( 'c-tgt' ),
-            params
+    baseEngine: function ( model, e, $target ) {
+        var tgt = $target.attr( 'c-tgt' ),
+            i, params
 
             if ( tgt === undefined )
-                return $t.val()
+                return $target.val()
 
-            if ( !~tgt.indexOf( ':' ) )
-                return $t[tgt]()
+            i = tgt.indexOf( ':' )
 
-            tgt    = tgt.split(    ':' )
-            params = tgt[1].split( ',' )
-            tgt    = tgt[0]
+            if ( !~i )
+                return $target[tgt]()
 
-            return $t[tgt].apply( $t, params )
+            params = tgt.slice( i + 1 )
+            params = params.split( ',' )
+
+            tgt    = tgt.slice( 0, i )
+
+            return $target[tgt].apply( $target, params )
     },
 
     add: function ( node ) {

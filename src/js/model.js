@@ -13,6 +13,7 @@ function Model () {
         remove: [],
         data:   {}
     }
+    this.dataids = {}
 }
 
 /* events
@@ -85,8 +86,7 @@ Model.prototype = {
 
 
 
-
-    set: function ( name, value, dontTrigger ) {
+    set: function ( name, value ) {
         if ( !name )
             return this
 
@@ -112,7 +112,6 @@ Model.prototype = {
             d = d[cur]
 
             add = true
-            // addList.push( d )
         }
 
 
@@ -123,12 +122,14 @@ Model.prototype = {
 
 
 
-        // add = ! this.data.hasOwnProperty( name )
         if ( ! d.hasOwnProperty( cur ) )
             add = true
 
 
         d[cur] = value
+
+        // keep a record so we can export if needed
+        this.dataids[name] = true
 
 
 
@@ -151,7 +152,7 @@ Model.prototype = {
 
 
 
-
+    /*
     unset: function ( name ) {
         if ( !name || !this.data.hasOwnProperty( name ) )
             return this
@@ -163,7 +164,7 @@ Model.prototype = {
         this.trigger( 'remove', { name: name } )
 
         return this
-    },
+    },*/
 
 
 
@@ -235,6 +236,23 @@ Model.prototype = {
 
         }
         return this
+    },
+
+    loadState: function ( data ) {
+        // TODO: is there a better way to import / export? should we trigger
+        // on import / export
+        for ( var i in data )
+            this.set( i, data[i] )
+    },
+
+    saveState: function () {
+        var ex = {},
+            i
+
+        for ( i in this.dataids )
+            ex[i] = this.get( i )
+
+        return ex
     }
 
 }

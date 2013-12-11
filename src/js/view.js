@@ -52,7 +52,7 @@ function view_getListener ( evt ) {
 
 function view_router ( model, evt, data ) {
     var $targets = this.$node.find( '[v-name="' + data.name + '"]' ),
-        val, engine, i, $t, tgt, params
+        val, engine, i, $target
 
     if ( $targets.length === 0 )
         return
@@ -61,31 +61,10 @@ function view_router ( model, evt, data ) {
            ? this.engine[data.name]
            : this.defaultEngine
            ? this.defaultEngine
-           : this.stringEngine
+           : this.baseEngine
 
-    val = engine( model.get( data.name ) )
-
-    for ( i = 0; $t = $targets.at( i ); i++ ) {
-
-        tgt = $t.attr( 'v-tgt' )
-
-        if ( tgt === undefined ) {
-            $t.text( val )
-            return;
-        }
-
-        if ( !~tgt.indexOf( ':' ) ) {
-            $t[tgt]( val )
-            return;
-        }
-
-        tgt    = tgt.split(    ':' )
-        params = tgt[1].split( ',' )
-        tgt    = tgt[0]
-
-        $t[tgt].apply( $t, params )
-
-    }
+    for ( i = 0; $target = $targets.at( i ); i++ )
+        engine.call( this.model, $target, evt, data )
 }
 
 
@@ -103,10 +82,32 @@ View.prototype = {
     engine: {},
 
 
-
     // this is used as the default engine if defaultEngine is not present
-    stringEngine: function ( val ) { return val.toString() },
+    baseEngine: function ( $target, evt, data ) {
+        var tgt = $target.attr( 'v-tgt' ),
+            i, params
 
+        if ( tgt === undefined ) {
+            $target.text( data.value )
+            return;
+        }
+
+        i = tgt.indexOf( ':' )
+
+        if ( !~i ) {
+            $target[tgt]( data.value )
+            return;
+        }
+
+        params = tgt.slice( i + 1 )
+        params = params.split( ',' )
+
+        tgt    = tgt.slice( 0, i )
+
+        params.push( data.value )
+
+        $target[tgt].apply( $target, params )
+    },
 
 
 
