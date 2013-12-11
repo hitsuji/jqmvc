@@ -1,14 +1,40 @@
 #!/bin/bash
 
-DEBUG=true
+clean() {
+    rm -rf "debug"
+    rm -rf "release"
+}
 
-OUT=$( [ $DEBUG ] && echo "debug" || echo "release" )
-SRC="src"
+build() {
+    OUT=$( [[ "$1" == "release" ]] && echo "release" || echo "debug" )
+    SRC="src"
 
-rm -rf "$OUT"
-mkdir  "$OUT"
+    mkdir  "$OUT"
 
-JS_SRC="$SRC/jqmvc.js"
-JS_OUT="$OUT/jqmvc.js"
+    buildr "file:$SRC/jqmvc.js" $( [[ ! "$1" == "release" ]] && echo "compress" ) > "$OUT/jqmvc.js"
+}
 
-buildr "$JS_SRC" > "$JS_OUT"
+main() {
+    case "$1" in
+        "clean")
+            clean
+            ;;
+
+        "debug")
+            clean
+            build "debug"
+            ;;
+
+        "release")
+            clean
+            build "release"
+            ;;
+
+        "push")
+            ;;
+    esac
+}
+
+for i in ${1+"$@"}; do
+    main "$i"
+done
